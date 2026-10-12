@@ -1,0 +1,6 @@
+--extra-index-url https://download.pytorch.org/whl/xpu
+torch              == 2.12.*
+transformers       == 5.8.*
+#accelerate
+#onednn
+ninja_syntax

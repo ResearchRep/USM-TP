@@ -1,0 +1,124 @@
+= Tensor Parallelism on Heterogenous Systems with Shared Memory
+:DPCpp: DPC++
+:idprefix:
+:idseparator: -
+
+== Important Files
+* `split_matmuls.cpp`: Implements split GEMV and split Qwen3 MLP,
+  splitting workload over CPU/GPU. Uses OneDNN, ATen and SYCL.
+
+* `split_matmuls.py`: Python module that exposes the
+  functionality in `split_matmuls.cpp`.
+
+* Scripts for running specific workloads.
+  Run these with `-h` for detailed usage info:
+**  `run-matmul.py`: Run split GEMV
+**  `run-qwen-mlp.py`: Run Qwen3 MLP,
+    split using either GEMV-split or MLP-split.
+**  `run-inference.py`: Run a HuggingFace transformer,
+    split using GEMV-split.
+
+* Scripts to test correctness
+** `test-matmul.py`: Test for GEMV-split
+** `test-custom-mlp.py`: Test for MLP-split
+
+* Build automation and helpers:
+**  `configure.py`: Generates a `build.ninja` for building the code
+**  `build-dnnl.sh`: Helper script to make a custom build of oneDNN
+**  `.env`: Sets environment variables that are important for
+    running the code
+
+== Prerequisites
+* link:https://www.intel.com/content/www/us/en/developer/articles/tool/pytorch-prerequisites-for-intel-gpu/2-12.html#intel-deeplearning-essentials-installation[PyTorch 2.12 Prerequisites for Intel GPUs].
+  This covers everything needed to run PyTorch,
+  and a few more essentials like the {DPCpp} compiler.
+**  Be sure to install the 2025.3 release of the
+    Intel Deep Learning Essentials,
+    since this project uses PyTorch 2.12
+* link:https://ninja-build.org/[Ninja].
+  On Debian-based systems, `apt install ninja-build`.
+* Python 3
+
+== Building
+
+=== Setting up a Python Virtual Environment (venv)
+1. Create the venv:
++
+----
+python3 -m venv ./venv
+----
+
+2. Activate the venv:
++
+----
+. venv/bin/activate
+----
+
+3. Install requirements:
++
+----
+pip3 install -r ./requirements.txt
+----
+
+=== Building OneDNN
+The project uses a custom build of oneDNN,
+configured to use OpenMP as a threading backend for the CPU
+(prebuilt binaries on PyPI use the single-threaded sequential backend).
+
+`build-dnnl.sh` is provided to simplify the process of building oneDNN.
+
+----
+./build-dnnl.sh omp
+----
+
+This will take a while.
+After this, you should find an installation of oneDNN
+at `./oneDNN/install/`.
+
+=== Configuring and Building `libsplit_matmuls.so`
+Now, our shared library,
+built from `split_matmuls.cpp`.
+
+1. First, activate the venv if you haven't already:
++
+----
+. venv/bin/activate
+----
+
+2. Configure the build.
+   The venv will automatically be picked up,
+   but the custom oneDNN installation needs to be specified:
++
+----
+./configure.py --dnnl-prefix ./oneDNN/install
+----
+
+3. Build the library:
++
+----
+ninja
+----
+
+After this, you should find `libsplit_matmuls.so` and `.env`.
+`.env` sets some environment variables
+(including some OpenMP settings),
+and should be sourced into the shell before running anything.
+
+=== Verifying that Everything Works
+To test if everything is built and installed correctly,
+
+1. If you haven't already,
++
+----
+. .env
+. venv/bin/activate
+----
+
+2. Run the split matmul test
++
+----
+./test-matmul.py
+----
+
+See <<important-files>> for a quick overview of the various scripts
+provided here.
