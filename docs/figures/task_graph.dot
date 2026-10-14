@@ -1,0 +1,12 @@
+digraph G {
+    rankdir="BT"
+    C [label="CPU\nPart." color="gray" style="filled"]
+    G [label="GPU\nPart." group="g"]
+    P [label="Prev." group="g"]
+    N [label="Next" group="g"]
+
+    N -> G
+    N -> C
+    G -> P
+    C -> P
+}

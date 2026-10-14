@@ -1,0 +1,43 @@
+= Design
+
+== CPU and GPU Interations
+USM-TP implements tensor-parallel split routines
+for GEMM and the forward pass of Qwen3 MLP.
+In both cases,
+a workload is split into 2 partitions,
+assigned to the CPU and GPU.
+The following sequence of events occurs
+within a single split operation,
+from the perspective of the host:
+
+1. CPU and GPU synchronize.
+   All prior work on GPU completes,
+   and work queue is empty.
+2. GPU partition is launched, asynchronously.
+3. CPU partition is launched, synchronously.
+4. The next GPU kernel (following the split operation) is launched.
+
+The CPU partition of a split operation
+depends on the preceeding GPU kernel.
+This dependency is satisfied by the synchronization point (step 1).
+On the other hand,
+the GPU kernel succeeding the split operation
+depends on the CPU partition.
+This dependency is satisfied because the enqueue of the GPU kernel
+occurs after the CPU partition completes (step 4).
+
+Note that the split operations are synchronized
+only with respect to the preceeding and succeeding GPU kernels.
+
+image::figures/task_graph.dot.svg[]
+
+== Compute Kernels
+Each of the partitions in a split operation is itself
+a series of operations (e.g. GEMM) on a single device.
+we rely on external libraries for
+highly performant implementations of these operations.
+OneDNN is used for the CPU, while
+OneDNN and Aten/XPU (PyTorch's internal tensor library for the XPU backend)
+are both used for the GPU.
+
+We make this choice simply on the basis of how well each library performs.
