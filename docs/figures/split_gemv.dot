@@ -1,0 +1,7 @@
+digraph {
+    node [shape="plaintext"]
+    G [label=<<table cellspacing="0"><tr>
+        <td bgcolor="#ff8080">GEMV</td>
+        <td bgcolor="#8080ff">GEMV</td>
+    </tr></table>>]
+}

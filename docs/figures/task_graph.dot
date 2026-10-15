@@ -1,12 +1,20 @@
 digraph G {
     rankdir="BT"
-    C [label="CPU\nPart." color="gray" style="filled"]
-    G [label="GPU\nPart." group="g"]
+    C [label=<<B>CPU Part.</B>> color="gray" style="filled" group="c"]
+    G [label=<<B>GPU Part.</B>> group="g"]
     P [label="Prev." group="g"]
     N [label="Next" group="g"]
 
-    N -> G
-    N -> C
-    G -> P
-    C -> P
+    LG [label=<<B>GPU Part.<br/>Launch</B>> style="filled" color="gray" group="c"]
+    LN [label="Next\nLaunch" style="filled" color="gray" group="c"]
+
+    LN -> C
+    C -> LG
+    LG -> P
+
+    G -> LG
+    N -> LN
+
+    N -> G [color="transparent"]
+    G -> P [color="transparent"]
 }

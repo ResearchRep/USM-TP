@@ -1,0 +1,39 @@
+digraph {
+    rankdir="BT"
+    node [shape="plaintext"]
+    G [label=<<table cellspacing="0" cellpadding="0"><tr>
+        <td bgcolor="#ff8080">Gate  </td>
+        <td bgcolor="#8080ff">Gate  </td>
+    </tr></table>>]
+
+    U [label=<<table cellspacing="0"><tr>
+        <td bgcolor="#ff8080">Up    </td>
+        <td bgcolor="#8080ff">Up    </td>
+    </tr></table>>]
+
+    D [label=<<table cellspacing="0">
+        <tr><td bgcolor="#ff8080">Down  </td></tr>
+        <tr><td bgcolor="#8080ff">Down  </td></tr>
+    </table>>]
+
+    S [label=<<table cellspacing="0"><tr>
+        <td bgcolor="#ff8080">SiLU  </td>
+        <td bgcolor="#8080ff">SiLU  </td>
+    </tr></table>>]
+
+    M [label=<<table cellspacing="0"><tr>
+        <td bgcolor="#ff8080">Mul   </td>
+        <td bgcolor="#8080ff">Mul   </td>
+    </tr></table>>]
+
+    A [shape="box" label="Add\n(output)"]
+    I [shape="box" label="(Input)"]
+
+    A -> D
+    D -> M #[label="1xIa,\n1xIb"]
+    M -> U #[label="1xIa,\n1xIb"]
+    M -> S #[label="1xIa,\n1xIb"]
+    S -> G #label="1xIa,\n1xIb"]
+    G -> I #label="1xH"]
+    U -> I #[label="1xH"]
+}
